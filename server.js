@@ -13,31 +13,38 @@ server.on("error", (error) => {
 });
 
 server.on("connection", (client) => {
-  // TODO: split by object, not new line
   const stream = client.pipe(split());
 
   stream.on("data", (clientData) => {
-    const data = JSON.parse(clientData);
-    let resultMessage = `Operation ${data.operation} not supported.`;
+    let data = {}
+    try {
+      console.log("data: ", clientData);
+      data = JSON.parse(clientData);
+    } catch (error) {
+      console.log("[SERVER] ERROR: " + error.message);
+    }
+
+    let result = `Operation ${data.operation} not supported.`;
     switch (data.operation) {
       case "post":
-        resultMessage = post(data.data);
+        result = post(data.data);
         break;
       case "get":
-        resultMessage = get(data.serviceName);
+        result = get(data.serviceName);
         break;
       case "delete":
-        resultMessage = remove(data.serviceAddress);
+        result = remove(data.serviceAddress);
+        break;
+      case "keepAlive":
+        result = {status: "success"};
         break;
       default:
         break;
     }
-    
-    client.write("145.345.34.2");
-    
-    client.write("successo");
-
-    client.write("145.123.23.1");
+    const resultData = JSON.stringify({
+      ...result, id: data.id
+    }) + "\n"
+    client.write(resultData);
   });
 
   client.on("error", (error) => {
@@ -61,28 +68,45 @@ server.on("connection", (client) => {
 const post = (data) => {
   const registered = postService(data);
   if (registered) {
-    return "Service successfully registered.";
+    return {
+      status: "success",
+      message: "Service successfully registered."
+    };
   } else {
-    return "Address already registered for another service.";
+    return {
+      status: "error",
+      message: "Address already registered for another service."
+    };
   }
 };
 
 const get = (data) => {
   const address = getService(data);
   if (address) {
-    return address;
+    return {
+      status: "success",
+      data: address
+    };
   } else {
-    // TODO: client precisa saber se é o erro ou o address
-    return "Service unavailable, try again later.";
+    return {
+      status: "error",
+      data: "Service unavailable, try again later."
+    };
   }
 };
 
 const remove = (data) => {
   const removed = deleteService(data);
   if (removed) {
-    return "Service removed from DNS database.";
+    return {
+      status: "success",
+      data: "Service removed from DNS database."
+    };
   } else {
-    return "A service with this address does not exist in the database.";
+    return {
+      status: "success",
+      data: "A service with this address does not exist in the database."
+    };
   }
 };
 
