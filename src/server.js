@@ -2,6 +2,8 @@ import net from "net";
 import split from "split";
 import { postService, getService, deleteService } from "./services/database.js";
 
+const SPLITTER = "\n";
+
 const server = net.createServer();
 
 server.on("error", (error) => {
@@ -43,8 +45,8 @@ server.on("connection", (client) => {
     }
     const resultData = JSON.stringify({
       ...result, id: data.id
-    }) + "\n"
-    client.write(resultData);
+    }) 
+    client.write(resultData + SPLITTER);
   });
 
   client.on("error", (error) => {
@@ -90,7 +92,7 @@ const get = (data) => {
   } else {
     return {
       status: "error",
-      data: "Service unavailable, try again later."
+      message: "Service unavailable, try again later."
     };
   }
 };
@@ -104,7 +106,7 @@ const remove = (data) => {
     };
   } else {
     return {
-      status: "success",
+      status: "error",
       data: "A service with this address does not exist in the database."
     };
   }

@@ -1,32 +1,43 @@
-import Connection from "../middleware/index.js";
+import Connection from "../middleware/index";
 
-const connection = await Connection.create();
+const start = async () => {
+  const connection = await Connection.create();
 
-connection.register("testService")
-  .then((data) => {
-    console.log(`[CLIENT] INFO: REGISTERED - ${data}`);
-  })
-  .catch((error) => {
-    console.log(`[CLIENT] ERROR: NOT REGISTERED - ${error}`);
-  });
-  
-connection.request("testService")
-  .then((data) => {
-    console.log(`[CLIENT] INFO: GOT - ${data}`);
-  })
-  .catch((error) => {
-    console.log(`[CLIENT] ERROR: DID NOT GET - ${error}`);
-  });
+  // TODO: return only Connection instances
+  if (connection instanceof Connection) {
+    connection
+      // TODO: verificar se sobrescreve
+      .register("testService")
+      .then((data: string | Object) => {
+        console.log(`[CLIENT] INFO: REGISTERED - ${data}`);
+      })
+      .catch((error: Object) => {
+        console.log(`[CLIENT] ERROR: NOT REGISTERED - ${error}`);
+      });
 
-connection.remove()
-  .then((data) => {
-    console.log(`[CLIENT] INFO: REMOVED - ${data}`);
-  })
-  .catch((error) => {
-    console.log(`[CLIENT] ERROR: DID NOT REMOVE - ${error}`);
-  });
+    connection
+      .request("testService")
+      .then((data: Object) => {
+        console.log(`[CLIENT] INFO: GOT - ${data}`);
+      })
+      .catch((error: Object) => {
+        console.log(`[CLIENT] ERROR: DID NOT GET - ${error}`);
+      });
 
+    connection
+      .remove()
+      .then((data: Object) => {
+        console.log(`[CLIENT] INFO: REMOVED - ${data}`);
+      })
+      .catch((error: Object) => {
+        console.log(`[CLIENT] ERROR: DID NOT REMOVE - ${error}`);
+      });
+  } else {
+    console.log(connection);
+  }
+};
 
+start();
 
 // import net from "net";
 
