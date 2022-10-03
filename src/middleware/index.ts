@@ -83,7 +83,6 @@ export default class Connection implements ConnectionI {
     const stream = this.client.pipe(split());
 
     stream.on("data", (res: string) => {
-      // TODO: remover promise do array após ser resolved ou rejected
       const response = JSON.parse(res);
       Object.keys(this.promises).forEach((requestId) => {
         if (requestId === response.id) {
@@ -96,8 +95,6 @@ export default class Connection implements ConnectionI {
 
           this.promises[requestId].resolve(response.data || response.message);
           delete this.promises[requestId];
-          console.log(requestId, this.promises);
-          
         }
       });
     });

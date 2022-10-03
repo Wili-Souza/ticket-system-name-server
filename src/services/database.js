@@ -1,15 +1,29 @@
-// usar arquivo
+// TODO: usar arquivo
 const database = [];
 
 export const postService = (data) => {
-  const sameAddressesRegistered = database.filter(
-    (item) => item.address === data.adress
+  let registered = false;
+  let taken = false;
+
+  database.forEach(
+    (item) => {
+      if (item.address === data.address && item.name === data.name) {
+        registered = true;
+      } else if (item.address === data.address) {
+        taken = true;
+      }
+    }
   );
-  if (sameAddressesRegistered.length > 0) {
+
+  if (registered) {
+    return true;
+  }
+
+  if (taken) {
     return false;
   }
+
   database.push(data);
-  console.log(database);
   return true;
 };
 
@@ -30,7 +44,6 @@ export const deleteService = (serviceAddress) => {
   );
   if (serviceIndex >= 0) {
     database.splice(serviceIndex, 1);
-    console.log(database);
     return true;
   }
   return false;
