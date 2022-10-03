@@ -28,7 +28,7 @@ export default class Connection implements ConnectionI {
   static async create(
     keepAlive: boolean = true,
     keepAliveInterval: number = 10
-  ): Promise<ConnectionI | string> {
+  ): Promise<Connection> {
     const [resolve, reject, promise] = createPromise();
 
     const client: net.Socket = new net.Socket();
@@ -36,10 +36,10 @@ export default class Connection implements ConnectionI {
     client.connect(DNS_PORT, DNS_ADDRESS, () => {
       const { address, port } = client.address() as AddressInfo;
       if (!address || !port) {
-        reject(`${address}:${port} is not a valid address.`);
+        reject(`[MIDDLEWARE] ERROR: ${address}:${port} is not a valid address.`);
       }
       const fullAddress = `${address}:${port}`;
-      const connection: ConnectionI = new Connection(
+      const connection: Connection = new Connection(
         fullAddress,
         client,
         keepAlive,
@@ -95,6 +95,9 @@ export default class Connection implements ConnectionI {
           // retornar a response do serviço ao client
 
           this.promises[requestId].resolve(response.data || response.message);
+          delete this.promises[requestId];
+          console.log(requestId, this.promises);
+          
         }
       });
     });
