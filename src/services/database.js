@@ -24,6 +24,8 @@ export const postService = (data) => {
   }
 
   database.push(data);
+  
+  console.log(database);
   return true;
 };
 
