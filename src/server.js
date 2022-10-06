@@ -87,7 +87,7 @@ const get = (data) => {
   if (address) {
     return {
       status: "success",
-      data: address
+      serviceAddress: address
     };
   } else {
     return {
@@ -102,12 +102,12 @@ const remove = (data) => {
   if (removed) {
     return {
       status: "success",
-      data: "Service removed from DNS database."
+      message: "Service removed from DNS database."
     };
   } else {
     return {
       status: "error",
-      data: "A service with this address does not exist in the database."
+      message: "A service with this address does not exist in the database."
     };
   }
 };

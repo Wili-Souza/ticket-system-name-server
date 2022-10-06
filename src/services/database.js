@@ -1,4 +1,3 @@
-// TODO: usar arquivo
 const database = [];
 
 export const postService = (data) => {
