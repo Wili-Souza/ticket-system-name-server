@@ -1,18 +1,30 @@
 const database = [];
 
+// [
+//   {
+//     address: '192.168.1.9:7071',
+//     name: 'ticketService',
+//     sent: 0
+//   }
+// ]
+
+const getLeastBusyServiceIndex = (services) => {
+  const values = services.map((service) => service.sent);
+  const indexOfLeastBusy = values.indexOf(Math.min(...values));
+  return indexOfLeastBusy;
+};
+
 export const postService = (data) => {
   let registered = false;
   let taken = false;
 
-  database.forEach(
-    (item) => {
-      if (item.address === data.address && item.name === data.name) {
-        registered = true;
-      } else if (item.address === data.address) {
-        taken = true;
-      }
+  database.forEach((item) => {
+    if (item.address === data.address && item.name === data.name) {
+      registered = true;
+    } else if (item.address === data.address) {
+      taken = true;
     }
-  );
+  });
 
   if (registered) {
     return true;
@@ -22,9 +34,12 @@ export const postService = (data) => {
     return false;
   }
 
-  database.push(data);
-  
-  console.log(database);
+  database.push({
+    ...data,
+    sent: 0
+  });
+
+  // console.log(database);
   return true;
 };
 
@@ -33,8 +48,10 @@ export const getService = (serviceName) => {
     (item) => item.name === serviceName
   );
   if (sameAddressesRegistered.length > 0) {
-    // TODO: selecionar um dos serviços disponíveis em caso > 1
-    return sameAddressesRegistered[0].address;
+    console.log("servers: ", sameAddressesRegistered);
+    const leastBusyIndex = getLeastBusyServiceIndex(sameAddressesRegistered);
+    sameAddressesRegistered[leastBusyIndex].sent++;
+    return sameAddressesRegistered[leastBusyIndex].address;
   }
   return undefined;
 };
