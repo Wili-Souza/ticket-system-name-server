@@ -3,6 +3,7 @@ import split from "split";
 import { postService, getService, deleteService } from "./services/database.js";
 
 const SPLITTER = "\n";
+const STANDBY_KEY = "Standby";
 
 const server = net.createServer();
 
@@ -18,7 +19,7 @@ server.on("connection", (client) => {
   const stream = client.pipe(split());
 
   stream.on("data", (clientData) => {
-    let data = {}
+    let data = {};
     try {
       console.log("data: ", clientData);
       data = JSON.parse(clientData);
@@ -38,14 +39,15 @@ server.on("connection", (client) => {
         result = remove(data.serviceAddress);
         break;
       case "keepAlive":
-        result = {status: "success"};
+        result = { status: "success" };
         break;
       default:
         break;
     }
     const resultData = JSON.stringify({
-      ...result, id: data.id
-    }) 
+      ...result,
+      id: data.id,
+    });
     client.write(resultData + SPLITTER);
   });
 
@@ -72,12 +74,12 @@ const post = (data) => {
   if (registered) {
     return {
       status: "success",
-      message: "Service successfully registered."
+      message: "Service successfully registered.",
     };
   } else {
     return {
       status: "error",
-      message: "Address already registered for another service."
+      message: "Address already registered for another service.",
     };
   }
 };
@@ -87,14 +89,24 @@ const get = (data) => {
   if (address) {
     return {
       status: "success",
-      serviceAddress: address
-    };
-  } else {
-    return {
-      status: "error",
-      message: "Service unavailable, try again later."
+      serviceAddress: address,
     };
   }
+
+  const standbyServiceName = data + STANDBY_KEY;
+  const standbyAddress = getService(standbyServiceName);
+  if (standbyAddress) {
+    return {
+      status: "success",
+      serviceAddress: standbyAddress,
+    };
+  }
+
+  return {
+    status: "error",
+    message:
+      "Neither Service nor Standby Service are available in the moment, try again later.",
+  };
 };
 
 const remove = (data) => {
@@ -102,12 +114,12 @@ const remove = (data) => {
   if (removed) {
     return {
       status: "success",
-      message: "Service removed from DNS database."
+      message: "Service removed from DNS database.",
     };
   } else {
     return {
       status: "error",
-      message: "A service with this address does not exist in the database."
+      message: "A service with this address does not exist in the database.",
     };
   }
 };

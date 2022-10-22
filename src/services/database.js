@@ -51,6 +51,7 @@ export const getService = (serviceName) => {
     console.log("servers: ", sameAddressesRegistered);
     const leastBusyIndex = getLeastBusyServiceIndex(sameAddressesRegistered);
     sameAddressesRegistered[leastBusyIndex].sent++;
+    console.log(sameAddressesRegistered[leastBusyIndex].address);
     return sameAddressesRegistered[leastBusyIndex].address;
   }
   return undefined;
