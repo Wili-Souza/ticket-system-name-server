@@ -36,10 +36,10 @@ export const postService = (data) => {
 
   database.push({
     ...data,
-    sent: 0
+    sent: 0,
   });
 
-  // console.log(database);
+  console.log("[--- REGISTRADO]: ", data);
   return true;
 };
 
@@ -47,14 +47,31 @@ export const getService = (serviceName) => {
   const sameAddressesRegistered = database.filter(
     (item) => item.name === serviceName
   );
-  if (sameAddressesRegistered.length > 0) {
-    console.log("servers: ", sameAddressesRegistered);
+
+  if (sameAddressesRegistered.length === 1) {
+    return sameAddressesRegistered[0].address;
+  }
+
+  if (sameAddressesRegistered.length > 1) {
+    console.log("[-- ofertados]: ", sameAddressesRegistered);
     const leastBusyIndex = getLeastBusyServiceIndex(sameAddressesRegistered);
     sameAddressesRegistered[leastBusyIndex].sent++;
-    console.log(sameAddressesRegistered[leastBusyIndex].address);
+    console.log(
+      "[--- ENVIADO]: ",
+      sameAddressesRegistered[leastBusyIndex].address
+    );
     return sameAddressesRegistered[leastBusyIndex].address;
   }
+
   return undefined;
+};
+
+export const getAllServices = (servicesNames) => {
+  const services = database.filter((service) =>
+    servicesNames.includes(service.name)
+  );
+  const servicesAddresses = services.map((service) => service.address);
+  return servicesAddresses;
 };
 
 export const deleteService = (serviceAddress) => {
@@ -63,6 +80,7 @@ export const deleteService = (serviceAddress) => {
   );
   if (serviceIndex >= 0) {
     database.splice(serviceIndex, 1);
+    console.log("[--- REMOVIDO]: ", serviceAddress);
     return true;
   }
   return false;

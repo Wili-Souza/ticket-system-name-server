@@ -1,6 +1,11 @@
 import net from "net";
 import split from "split";
-import { postService, getService, deleteService } from "./services/database.js";
+import {
+  postService,
+  getService,
+  deleteService,
+  getAllServices,
+} from "./services/database.js";
 
 const SPLITTER = "\n";
 const STANDBY_KEY = "Standby";
@@ -21,7 +26,6 @@ server.on("connection", (client) => {
   stream.on("data", (clientData) => {
     let data = {};
     try {
-      console.log("data: ", clientData);
       data = JSON.parse(clientData);
     } catch (error) {
       console.log("[SERVER] ERROR: " + error.message);
@@ -35,11 +39,11 @@ server.on("connection", (client) => {
       case "get":
         result = get(data.serviceName);
         break;
+      case "getAll":
+        result = getAll(data.servicesNames);
+        break;
       case "delete":
         result = remove(data.serviceAddress);
-        break;
-      case "keepAlive":
-        result = { status: "success" };
         break;
       default:
         break;
@@ -52,21 +56,15 @@ server.on("connection", (client) => {
   });
 
   client.on("error", (error) => {
-    // TODO: testar para confirmar lógica
     client.write(`ERROR: ${error.message}`);
     client.destroy();
   });
 
   client.once("closed", () => {
-    // TODO: testar para confirmar lógica
     client.write(
       `INFO: connection closed: ${client.remoteAddress}:${client.remotePort}`
     );
   });
-
-  console.log(
-    `INFO: got new connection from ${client.remoteAddress}:${client.remotePort}`
-  );
 });
 
 const post = (data) => {
@@ -106,6 +104,21 @@ const get = (data) => {
     status: "error",
     message:
       "Neither Service nor Standby Service are available in the moment, try again later.",
+  };
+};
+
+const getAll = (data) => {
+  const results = getAllServices(data);
+  if (results) {
+    return {
+      status: "success",
+      serviceAddress: results,
+    };
+  }
+
+  return {
+    status: "error",
+    message: "Internal Error, try again later.",
   };
 };
 
